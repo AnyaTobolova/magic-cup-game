@@ -45,6 +45,7 @@
           </div>
 
           <button id="startButton" class="primary-button" type="button">Начать</button>
+          <button id="statsButton" class="secondary-button full-button" type="button">Статистика</button>
         </div>
       </section>
 
@@ -140,6 +141,18 @@
           <h2 id="albumTitle">Альбом зайчика</h2>
         </header>
         <div id="stickerAlbum" class="sticker-album"></div>
+      </section>
+
+      <section id="statsScreen" class="screen stats-screen hidden" aria-labelledby="statsTitle">
+        <header class="album-header">
+          <button id="closeStatsButton" class="icon-button text-button" type="button">Назад</button>
+          <h2 id="statsTitle">Статистика</h2>
+        </header>
+        <div class="stats-summary">
+          <p id="statsSummaryText">Пока нет ответов.</p>
+          <button id="resetStatsButton" class="secondary-button" type="button">Сбросить статистику</button>
+        </div>
+        <div id="statsTable" class="stats-table" aria-label="Статистика по числам"></div>
       </section>
     </main>
 

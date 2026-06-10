@@ -330,6 +330,11 @@ h2 {
   font-size: 1.35rem;
 }
 
+.full-button {
+  width: 100%;
+  margin-top: 14px;
+}
+
 .secondary-button,
 .icon-button {
   min-height: 48px;
@@ -1130,6 +1135,15 @@ h2 {
   padding: 18px;
 }
 
+.stats-screen {
+  min-height: calc(100vh - 36px);
+  padding: 18px;
+  border: 4px solid rgba(255, 255, 255, 0.72);
+  border-radius: 24px;
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: var(--shadow);
+}
+
 .album-header {
   margin-bottom: 20px;
 }
@@ -1166,6 +1180,73 @@ h2 {
 .sticker-card.locked {
   opacity: 0.55;
   background: #f2eee7;
+}
+
+.stats-summary {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 20px;
+  background: #fff4dd;
+}
+
+.stats-summary p {
+  margin: 0;
+  color: #4f4958;
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.stats-table {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.stats-card {
+  padding: 14px;
+  border: 3px solid #edf0f6;
+  border-radius: 20px;
+  background: #f7f9ff;
+}
+
+.stats-card.hardest {
+  border-color: #ff9a72;
+  background: #fff0e9;
+}
+
+.stats-number {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  color: #fff;
+  background: var(--blue);
+  font-size: 1.9rem;
+  font-weight: 900;
+}
+
+.stats-card.hardest .stats-number {
+  background: var(--coral);
+}
+
+.stats-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  color: #5b5665;
+  font-weight: 800;
+}
+
+.stats-line strong {
+  color: var(--ink);
 }
 
 @keyframes soft-shake {
@@ -1512,5 +1593,14 @@ h2 {
     width: 138px;
     height: 106px;
     font-size: 4.4rem;
+  }
+
+  .stats-summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .stats-table {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

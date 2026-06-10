@@ -49,12 +49,14 @@ const screens = {
   game: document.getElementById("gameScreen"),
   summary: document.getElementById("summaryScreen"),
   album: document.getElementById("albumScreen"),
+  stats: document.getElementById("statsScreen"),
 };
 
 const elements = {
   numberChoices: document.getElementById("numberChoices"),
   magicChoices: document.getElementById("magicChoices"),
   startButton: document.getElementById("startButton"),
+  statsButton: document.getElementById("statsButton"),
   backButton: document.getElementById("backButton"),
   dayNumber: document.getElementById("dayNumber"),
   totalBadge: document.getElementById("totalBadge"),
@@ -77,7 +79,45 @@ const elements = {
   playAgainButton: document.getElementById("playAgainButton"),
   chooseNumberButton: document.getElementById("chooseNumberButton"),
   openAlbumButton: document.getElementById("openAlbumButton"),
+  closeStatsButton: document.getElementById("closeStatsButton"),
+  resetStatsButton: document.getElementById("resetStatsButton"),
+  statsTable: document.getElementById("statsTable"),
+  statsSummaryText: document.getElementById("statsSummaryText"),
 };
+
+function createEmptyStats() {
+  const stats = {};
+  for (let number = 3; number <= 10; number += 1) {
+    stats[number] = { correct: 0, mistakes: 0 };
+  }
+  return stats;
+}
+
+function getSavedStats() {
+  const defaults = createEmptyStats();
+  try {
+    const saved = JSON.parse(localStorage.getItem("magicCupStats") || "{}");
+    return { ...defaults, ...saved };
+  } catch {
+    return defaults;
+  }
+}
+
+function saveStats(stats) {
+  localStorage.setItem("magicCupStats", JSON.stringify(stats));
+}
+
+function recordAnswerResult(isCorrect) {
+  const stats = getSavedStats();
+  const key = String(state.selectedNumber);
+  stats[key] ||= { correct: 0, mistakes: 0 };
+  if (isCorrect) {
+    stats[key].correct += 1;
+  } else {
+    stats[key].mistakes += 1;
+  }
+  saveStats(stats);
+}
 
 function getSavedStickers() {
   try {
@@ -233,6 +273,7 @@ function startTask() {
 }
 
 function revealCorrectAnswer() {
+  recordAnswerResult(true);
   state.revealed = true;
   elements.hiddenZone.classList.add("revealed");
   elements.feedback.className = "feedback good";
@@ -262,9 +303,11 @@ function checkAnswer(answer, button) {
     return;
   }
 
+  recordAnswerResult(false);
   button.classList.remove("try-again");
   void button.offsetWidth;
   button.classList.add("try-again");
+  button.disabled = true;
   elements.feedback.className = "feedback hint";
   elements.feedback.textContent = `Почти! Всего ${state.selectedNumber}, видно ${state.visible}. Попробуй еще раз.`;
 }
@@ -306,6 +349,52 @@ function openAlbum() {
   showScreen("album");
 }
 
+function renderStats() {
+  const stats = getSavedStats();
+  const rows = Object.entries(stats).map(([number, item]) => {
+    const correct = Number(item.correct || 0);
+    const mistakes = Number(item.mistakes || 0);
+    const total = correct + mistakes;
+    const success = total > 0 ? Math.round((correct / total) * 100) : null;
+    return { number, correct, mistakes, total, success };
+  });
+
+  const maxMistakes = Math.max(...rows.map((row) => row.mistakes));
+  const hardest = rows.filter((row) => row.mistakes > 0 && row.mistakes === maxMistakes);
+  const totalAnswers = rows.reduce((sum, row) => sum + row.total, 0);
+
+  if (totalAnswers === 0) {
+    elements.statsSummaryText.textContent = "Пока нет ответов. Поиграйте немного, и здесь появится статистика.";
+  } else if (hardest.length > 0) {
+    elements.statsSummaryText.textContent = `Больше всего ошибок сейчас по числу: ${hardest.map((row) => row.number).join(", ")}.`;
+  } else {
+    elements.statsSummaryText.textContent = "Ошибок пока нет. Отличный старт!";
+  }
+
+  elements.statsTable.innerHTML = "";
+  rows.forEach((row) => {
+    const card = document.createElement("div");
+    card.className = `stats-card${row.mistakes > 0 && row.mistakes === maxMistakes ? " hardest" : ""}`;
+    card.innerHTML = `
+      <div class="stats-number">${row.number}</div>
+      <div class="stats-line"><span>Верно</span><strong>${row.correct}</strong></div>
+      <div class="stats-line"><span>Ошибки</span><strong>${row.mistakes}</strong></div>
+      <div class="stats-line"><span>Успех</span><strong>${row.success === null ? "-" : `${row.success}%`}</strong></div>
+    `;
+    elements.statsTable.appendChild(card);
+  });
+}
+
+function openStats() {
+  renderStats();
+  showScreen("stats");
+}
+
+function resetStats() {
+  localStorage.removeItem("magicCupStats");
+  renderStats();
+}
+
 function startGame() {
   state.seriesStars = 0;
   const selectedStep = mapSteps.findIndex((step) => step.magicId === state.selectedMagic);
@@ -315,6 +404,7 @@ function startGame() {
 }
 
 elements.startButton.addEventListener("click", startGame);
+elements.statsButton.addEventListener("click", openStats);
 elements.backButton.addEventListener("click", () => showScreen("start"));
 elements.newTaskButton.addEventListener("click", startTask);
 elements.stickersButton.addEventListener("click", openAlbum);
@@ -325,5 +415,7 @@ elements.playAgainButton.addEventListener("click", () => {
 });
 elements.chooseNumberButton.addEventListener("click", () => showScreen("start"));
 elements.openAlbumButton.addEventListener("click", openAlbum);
+elements.closeStatsButton.addEventListener("click", () => showScreen("start"));
+elements.resetStatsButton.addEventListener("click", resetStats);
 
 renderChoices();
