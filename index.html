@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Волшебный стаканчик</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ffefb1'/%3E%3Ccircle cx='32' cy='35' r='18' fill='%23fff' stroke='%23332d36' stroke-width='5'/%3E%3Cpath d='M23 19C18 7 28 4 31 18M41 19C46 7 36 4 33 18' fill='none' stroke='%23332d36' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='26' cy='35' r='2.8' fill='%23332d36'/%3E%3Ccircle cx='38' cy='35' r='2.8' fill='%23332d36'/%3E%3Cpath d='M28 43q4 4 8 0' fill='none' stroke='%23332d36' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="startScreen" class="screen start-screen" aria-labelledby="gameTitle">
+        <div class="hero-scene">
+          <div class="sun"></div>
+          <div class="cloud cloud-one"></div>
+          <div class="cloud cloud-two"></div>
+          <div class="path-preview" aria-label="Карта приключения">
+            <span class="map-dot done"></span>
+            <span class="map-line"></span>
+            <span class="map-dot"></span>
+            <span class="map-line"></span>
+            <span class="map-dot"></span>
+          </div>
+          <div class="hero-mascot" aria-hidden="true">🐰</div>
+          <div class="tea-table emoji-table" aria-hidden="true">
+            <span>🍬</span>
+            <span>🍬</span>
+            <span>🍬</span>
+          </div>
+        </div>
+
+        <div class="start-panel">
+          <p class="eyebrow">Игра про состав числа</p>
+          <h1 id="gameTitle"><span>Волшебный</span><span>стаканчик</span></h1>
+          <p class="lead">Помоги зайчику найти конфеты и собрать звездочки для чаепития.</p>
+
+          <div class="control-group" aria-labelledby="numberChoiceTitle">
+            <h2 id="numberChoiceTitle">Число дня</h2>
+            <div id="numberChoices" class="number-grid"></div>
+          </div>
+
+          <div class="control-group" aria-labelledby="magicChoiceTitle">
+            <h2 id="magicChoiceTitle">Что прячет конфеты?</h2>
+            <div id="magicChoices" class="magic-grid"></div>
+          </div>
+
+          <button id="startButton" class="primary-button" type="button">Начать</button>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen hidden" aria-live="polite">
+        <header class="game-header">
+          <button id="backButton" class="icon-button text-button" type="button">К выбору</button>
+          <div class="day-house" aria-label="Число дня">
+            <span>Число</span>
+            <strong id="dayNumber">3</strong>
+          </div>
+          <button id="stickersButton" class="icon-button text-button" type="button">Наклейки</button>
+        </header>
+
+        <nav id="adventureMap" class="adventure-map" aria-label="Карта приключения"></nav>
+
+        <section class="play-layout">
+          <aside class="friend-panel" aria-label="Помощники зайчика">
+            <div id="friendAvatar" class="friend-avatar" aria-hidden="true">🧸</div>
+            <p id="friendText">Мишка ждет конфеты к чаю.</p>
+          </aside>
+
+          <section class="task-panel" aria-labelledby="taskTitle">
+            <div class="task-topline">
+              <div>
+                <p class="small-label">Всего конфет</p>
+                <div id="totalBadge" class="total-badge">3</div>
+              </div>
+              <div class="stars" aria-label="Звездочки за серию">
+                <span class="star-slot"></span>
+                <span class="star-slot"></span>
+                <span class="star-slot"></span>
+                <span class="star-slot"></span>
+                <span class="star-slot"></span>
+              </div>
+            </div>
+
+            <h2 id="taskTitle">Сколько конфет спряталось?</h2>
+            <p id="taskText" class="task-text">Видно 1. Подумай, сколько под стаканчиком.</p>
+
+            <div class="counting-row" aria-label="Конфеты">
+              <div class="visible-zone">
+                <p class="zone-label">Видно</p>
+                <div id="visibleCandies" class="candy-board"></div>
+              </div>
+              <div class="hidden-zone">
+                <p class="zone-label">Спряталось</p>
+                <div id="hiddenCandies" class="hidden-board"></div>
+                <div id="magicCover" class="magic-cover cup-cover" aria-hidden="true"></div>
+              </div>
+            </div>
+
+            <div id="answerButtons" class="answers" aria-label="Варианты ответа"></div>
+
+            <div id="feedback" class="feedback neutral">Выбери ответ.</div>
+
+            <div class="game-actions">
+              <button id="newTaskButton" class="secondary-button" type="button">Новое задание</button>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <section id="summaryScreen" class="screen summary-screen hidden" aria-live="polite">
+        <div class="celebration-scene">
+          <div class="hero-mascot summary-mascot" aria-hidden="true">🐰</div>
+          <div class="guest-row" aria-hidden="true">
+            <span class="guest-face">🧸</span>
+            <span class="guest-face">🐿️</span>
+          </div>
+          <div class="party-table emoji-table" aria-hidden="true">
+            <span>☕</span>
+            <span>🍰</span>
+            <span>🍬</span>
+            <span>🍬</span>
+          </div>
+        </div>
+        <div class="summary-panel">
+          <p class="eyebrow">Чаепитие готово</p>
+          <h2>Ура! Ты собрал 5 звездочек.</h2>
+          <p id="stickerMessage" class="lead">В альбом зайчика добавилась новая наклейка.</p>
+          <div id="earnedSticker" class="earned-sticker"></div>
+          <div class="summary-actions">
+            <button id="playAgainButton" class="primary-button" type="button">Играть еще</button>
+            <button id="chooseNumberButton" class="secondary-button" type="button">Выбрать число</button>
+            <button id="openAlbumButton" class="secondary-button" type="button">Наклейки</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="albumScreen" class="screen album-screen hidden" aria-labelledby="albumTitle">
+        <header class="album-header">
+          <button id="closeAlbumButton" class="icon-button text-button" type="button">Назад</button>
+          <h2 id="albumTitle">Альбом зайчика</h2>
+        </header>
+        <div id="stickerAlbum" class="sticker-album"></div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
