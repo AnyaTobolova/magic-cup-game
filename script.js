@@ -23,11 +23,9 @@ const magicItems = [
 ];
 
 const mapSteps = [
-  "Стакан",
-  "Коробка",
-  "Шляпа",
-  "Чаепитие",
-  "Корзинка",
+  { label: "Стакан", magicId: "cup" },
+  { label: "Коробка", magicId: "box" },
+  { label: "Шляпа", magicId: "hat" },
 ];
 
 const friends = [
@@ -140,7 +138,7 @@ function renderMap() {
     step.className = "map-step";
     if (index < state.currentMapStep) step.classList.add("done");
     if (index === state.currentMapStep) step.classList.add("current");
-    step.textContent = label;
+    step.textContent = label.label;
     elements.adventureMap.appendChild(step);
   });
 }
@@ -195,6 +193,13 @@ function setMagicCover() {
   const item = magicItems.find((magic) => magic.id === state.selectedMagic) || magicItems[0];
   elements.magicCover.className = "magic-cover";
   elements.magicCover.textContent = item.icon;
+}
+
+function syncMagicWithMapStep() {
+  const step = mapSteps[state.currentMapStep];
+  if (step?.magicId) {
+    state.selectedMagic = step.magicId;
+  }
 }
 
 function getRandomVisible() {
@@ -276,6 +281,7 @@ function showSeriesSummary() {
   state.lastSticker = sticker;
   state.seriesStars = 0;
   state.currentMapStep = Math.min(state.currentMapStep + 1, mapSteps.length - 1);
+  syncMagicWithMapStep();
 
   elements.earnedSticker.textContent = sticker.art;
   elements.earnedSticker.setAttribute("aria-label", sticker.label);
@@ -302,7 +308,8 @@ function openAlbum() {
 
 function startGame() {
   state.seriesStars = 0;
-  state.currentMapStep = 0;
+  const selectedStep = mapSteps.findIndex((step) => step.magicId === state.selectedMagic);
+  state.currentMapStep = selectedStep >= 0 ? selectedStep : 0;
   showScreen("game");
   startTask();
 }
