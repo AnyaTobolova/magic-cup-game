@@ -8,6 +8,7 @@ const state = {
   currentMapStep: 0,
   totalCorrect: 0,
   revealed: false,
+  taskHadMistake: false,
   lastSticker: null,
 };
 
@@ -88,7 +89,7 @@ const elements = {
 function createEmptyStats() {
   const stats = {};
   for (let number = 3; number <= 10; number += 1) {
-    stats[number] = { correct: 0, mistakes: 0 };
+    stats[number] = { solved: 0, withMistake: 0 };
   }
   return stats;
 }
@@ -96,7 +97,7 @@ function createEmptyStats() {
 function getSavedStats() {
   const defaults = createEmptyStats();
   try {
-    const saved = JSON.parse(localStorage.getItem("magicCupStats") || "{}");
+    const saved = JSON.parse(localStorage.getItem("magicCupStatsV2") || "{}");
     return { ...defaults, ...saved };
   } catch {
     return defaults;
@@ -104,17 +105,16 @@ function getSavedStats() {
 }
 
 function saveStats(stats) {
-  localStorage.setItem("magicCupStats", JSON.stringify(stats));
+  localStorage.setItem("magicCupStatsV2", JSON.stringify(stats));
 }
 
-function recordAnswerResult(isCorrect) {
+function recordTaskResult() {
   const stats = getSavedStats();
   const key = String(state.selectedNumber);
-  stats[key] ||= { correct: 0, mistakes: 0 };
-  if (isCorrect) {
-    stats[key].correct += 1;
-  } else {
-    stats[key].mistakes += 1;
+  stats[key] ||= { solved: 0, withMistake: 0 };
+  stats[key].solved += 1;
+  if (state.taskHadMistake) {
+    stats[key].withMistake += 1;
   }
   saveStats(stats);
 }
@@ -256,6 +256,7 @@ function startTask() {
   state.visible = getRandomVisible();
   state.hidden = state.selectedNumber - state.visible;
   state.revealed = false;
+  state.taskHadMistake = false;
 
   elements.dayNumber.textContent = state.selectedNumber;
   elements.totalBadge.textContent = state.selectedNumber;
@@ -273,7 +274,7 @@ function startTask() {
 }
 
 function revealCorrectAnswer() {
-  recordAnswerResult(true);
+  recordTaskResult();
   state.revealed = true;
   elements.hiddenZone.classList.add("revealed");
   elements.feedback.className = "feedback good";
@@ -303,7 +304,7 @@ function checkAnswer(answer, button) {
     return;
   }
 
-  recordAnswerResult(false);
+  state.taskHadMistake = true;
   button.classList.remove("try-again");
   void button.offsetWidth;
   button.classList.add("try-again");
@@ -352,34 +353,34 @@ function openAlbum() {
 function renderStats() {
   const stats = getSavedStats();
   const rows = Object.entries(stats).map(([number, item]) => {
-    const correct = Number(item.correct || 0);
-    const mistakes = Number(item.mistakes || 0);
-    const total = correct + mistakes;
-    const success = total > 0 ? Math.round((correct / total) * 100) : null;
-    return { number, correct, mistakes, total, success };
+    const solved = Number(item.solved || 0);
+    const withMistake = Number(item.withMistake || 0);
+    const clean = Math.max(0, solved - withMistake);
+    const success = solved > 0 ? Math.round((clean / solved) * 100) : null;
+    return { number, solved, withMistake, clean, success };
   });
 
-  const maxMistakes = Math.max(...rows.map((row) => row.mistakes));
-  const hardest = rows.filter((row) => row.mistakes > 0 && row.mistakes === maxMistakes);
-  const totalAnswers = rows.reduce((sum, row) => sum + row.total, 0);
+  const maxMistakes = Math.max(...rows.map((row) => row.withMistake));
+  const hardest = rows.filter((row) => row.withMistake > 0 && row.withMistake === maxMistakes);
+  const totalSolved = rows.reduce((sum, row) => sum + row.solved, 0);
 
-  if (totalAnswers === 0) {
-    elements.statsSummaryText.textContent = "Пока нет ответов. Поиграйте немного, и здесь появится статистика.";
+  if (totalSolved === 0) {
+    elements.statsSummaryText.textContent = "Пока нет решенных заданий. Поиграйте немного, и здесь появится статистика.";
   } else if (hardest.length > 0) {
-    elements.statsSummaryText.textContent = `Больше всего ошибок сейчас по числу: ${hardest.map((row) => row.number).join(", ")}.`;
+    elements.statsSummaryText.textContent = `Чаще всего задания с ошибкой были по числу: ${hardest.map((row) => row.number).join(", ")}.`;
   } else {
-    elements.statsSummaryText.textContent = "Ошибок пока нет. Отличный старт!";
+    elements.statsSummaryText.textContent = "Пока все задания решены без ошибок. Отличный старт!";
   }
 
   elements.statsTable.innerHTML = "";
   rows.forEach((row) => {
     const card = document.createElement("div");
-    card.className = `stats-card${row.mistakes > 0 && row.mistakes === maxMistakes ? " hardest" : ""}`;
+    card.className = `stats-card${row.withMistake > 0 && row.withMistake === maxMistakes ? " hardest" : ""}`;
     card.innerHTML = `
       <div class="stats-number">${row.number}</div>
-      <div class="stats-line"><span>Верно</span><strong>${row.correct}</strong></div>
-      <div class="stats-line"><span>Ошибки</span><strong>${row.mistakes}</strong></div>
-      <div class="stats-line"><span>Успех</span><strong>${row.success === null ? "-" : `${row.success}%`}</strong></div>
+      <div class="stats-line"><span>Решено</span><strong>${row.solved}</strong></div>
+      <div class="stats-line"><span>С ошибкой</span><strong>${row.withMistake}</strong></div>
+      <div class="stats-line"><span>Без ошибок</span><strong>${row.success === null ? "-" : `${row.success}%`}</strong></div>
     `;
     elements.statsTable.appendChild(card);
   });
@@ -392,6 +393,7 @@ function openStats() {
 
 function resetStats() {
   localStorage.removeItem("magicCupStats");
+  localStorage.removeItem("magicCupStatsV2");
   renderStats();
 }
 
