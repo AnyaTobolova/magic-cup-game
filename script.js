@@ -10,6 +10,7 @@ const state = {
   revealed: false,
   taskHadMistake: false,
   lastSticker: null,
+  lastReward: null,
 };
 
 if ("scrollRestoration" in window.history) {
@@ -133,6 +134,18 @@ function saveSticker(stickerId) {
     saved.push(stickerId);
     localStorage.setItem("magicCupStickers", JSON.stringify(saved));
   }
+}
+
+function getSavedStickerShines() {
+  try {
+    return JSON.parse(localStorage.getItem("magicCupStickerShines") || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveStickerShines(shines) {
+  localStorage.setItem("magicCupStickerShines", JSON.stringify(shines));
 }
 
 function showScreen(screenName) {
@@ -313,34 +326,58 @@ function checkAnswer(answer, button) {
   elements.feedback.textContent = `Почти! Всего ${state.selectedNumber}, видно ${state.visible}. Попробуй еще раз.`;
 }
 
-function pickSticker() {
+function pickReward() {
   const saved = getSavedStickers();
-  const next = stickers.find((sticker) => !saved.includes(sticker.id)) || stickers[state.totalCorrect % stickers.length];
-  saveSticker(next.id);
-  return next;
+  const next = stickers.find((sticker) => !saved.includes(sticker.id));
+  if (next) {
+    saveSticker(next.id);
+    return { type: "sticker", sticker: next };
+  }
+
+  const shines = getSavedStickerShines();
+  const minShines = Math.min(...stickers.map((sticker) => Number(shines[sticker.id] || 0)));
+  const candidates = stickers.filter((sticker) => Number(shines[sticker.id] || 0) === minShines);
+  const upgraded = candidates[(state.totalCorrect - 1) % candidates.length];
+  shines[upgraded.id] = Number(shines[upgraded.id] || 0) + 1;
+  saveStickerShines(shines);
+
+  return { type: "shine", sticker: upgraded, shineCount: shines[upgraded.id] };
 }
 
 function showSeriesSummary() {
-  const sticker = pickSticker();
+  const reward = pickReward();
+  const { sticker } = reward;
   state.lastSticker = sticker;
+  state.lastReward = reward;
   state.seriesStars = 0;
   state.currentMapStep = Math.min(state.currentMapStep + 1, mapSteps.length - 1);
   syncMagicWithMapStep();
 
+  elements.earnedSticker.className = `earned-sticker${reward.type === "shine" ? " shiny" : ""}`;
   elements.earnedSticker.textContent = sticker.art;
   elements.earnedSticker.setAttribute("aria-label", sticker.label);
-  elements.stickerMessage.textContent = `В альбом добавилась наклейка «${sticker.label}».`;
+  if (reward.type === "shine") {
+    elements.stickerMessage.textContent = `Альбом уже собран! Наклейка «${sticker.label}» получила волшебную звездочку: ${reward.shineCount}.`;
+  } else {
+    elements.stickerMessage.textContent = `В альбом добавилась наклейка «${sticker.label}».`;
+  }
   showScreen("summary");
 }
 
 function renderAlbum() {
   const saved = getSavedStickers();
+  const shines = getSavedStickerShines();
   elements.stickerAlbum.innerHTML = "";
   stickers.forEach((sticker) => {
     const card = document.createElement("div");
     const isOpen = saved.includes(sticker.id);
-    card.className = `sticker-card${isOpen ? "" : " locked"}`;
-    card.innerHTML = `<span class="sticker-art">${isOpen ? sticker.art : "?"}</span><span>${isOpen ? sticker.label : "Скоро"}</span>`;
+    const shineCount = Number(shines[sticker.id] || 0);
+    card.className = `sticker-card${isOpen ? "" : " locked"}${shineCount > 0 ? " shining" : ""}`;
+    card.innerHTML = `
+      <span class="sticker-art">${isOpen ? sticker.art : "?"}</span>
+      <span>${isOpen ? sticker.label : "Скоро"}</span>
+      ${isOpen && shineCount > 0 ? `<span class="sticker-shine">★ ${shineCount}</span>` : ""}
+    `;
     elements.stickerAlbum.appendChild(card);
   });
 }

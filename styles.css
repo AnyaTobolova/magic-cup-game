@@ -1113,6 +1113,7 @@ h2 {
 }
 
 .earned-sticker {
+  position: relative;
   display: grid;
   width: 126px;
   height: 126px;
@@ -1123,6 +1124,28 @@ h2 {
   background: #fff3c2;
   box-shadow: 0 12px 0 rgba(118, 92, 34, 0.18);
   font-size: 3.5rem;
+}
+
+.earned-sticker.shiny {
+  background: linear-gradient(145deg, #fff7c8, #dff7ef);
+  box-shadow: 0 12px 0 rgba(118, 92, 34, 0.18), 0 0 28px rgba(255, 211, 86, 0.68);
+}
+
+.earned-sticker.shiny::after {
+  content: "★";
+  position: absolute;
+  right: -12px;
+  top: -14px;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: #ffd356;
+  color: #6d4a00;
+  font-size: 1.35rem;
+  box-shadow: 0 7px 0 rgba(118, 92, 34, 0.18);
 }
 
 .summary-actions {
@@ -1160,6 +1183,7 @@ h2 {
 }
 
 .sticker-card {
+  position: relative;
   display: grid;
   min-height: 136px;
   place-items: center;
@@ -1172,9 +1196,30 @@ h2 {
   font-weight: 900;
 }
 
+.sticker-card.shining {
+  border-color: #ffd356;
+  background: linear-gradient(145deg, #fffaf0, #e8fff5);
+  box-shadow: 0 10px 0 rgba(118, 92, 34, 0.12), 0 0 20px rgba(255, 211, 86, 0.34);
+}
+
 .sticker-card .sticker-art {
   display: block;
   font-size: 2.8rem;
+}
+
+.sticker-shine {
+  display: inline-grid;
+  min-width: 42px;
+  min-height: 30px;
+  place-items: center;
+  padding: 4px 9px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: #ffd356;
+  color: #6d4a00;
+  font-size: 0.9rem;
+  line-height: 1;
+  box-shadow: 0 5px 0 rgba(118, 92, 34, 0.13);
 }
 
 .sticker-card.locked {
