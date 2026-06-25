@@ -11,6 +11,7 @@ const state = {
   taskHadMistake: false,
   lastSticker: null,
   lastReward: null,
+  statsReturnScreen: "start",
 };
 
 if ("scrollRestoration" in window.history) {
@@ -59,6 +60,7 @@ const elements = {
   magicChoices: document.getElementById("magicChoices"),
   startButton: document.getElementById("startButton"),
   statsButton: document.getElementById("statsButton"),
+  gameStatsButton: document.getElementById("gameStatsButton"),
   backButton: document.getElementById("backButton"),
   dayNumber: document.getElementById("dayNumber"),
   totalBadge: document.getElementById("totalBadge"),
@@ -423,7 +425,8 @@ function renderStats() {
   });
 }
 
-function openStats() {
+function openStats(returnScreen = "start") {
+  state.statsReturnScreen = returnScreen;
   renderStats();
   showScreen("stats");
 }
@@ -443,7 +446,8 @@ function startGame() {
 }
 
 elements.startButton.addEventListener("click", startGame);
-elements.statsButton.addEventListener("click", openStats);
+elements.statsButton.addEventListener("click", () => openStats("start"));
+elements.gameStatsButton.addEventListener("click", () => openStats("game"));
 elements.backButton.addEventListener("click", () => showScreen("start"));
 elements.newTaskButton.addEventListener("click", startTask);
 elements.stickersButton.addEventListener("click", openAlbum);
@@ -454,7 +458,7 @@ elements.playAgainButton.addEventListener("click", () => {
 });
 elements.chooseNumberButton.addEventListener("click", () => showScreen("start"));
 elements.openAlbumButton.addEventListener("click", openAlbum);
-elements.closeStatsButton.addEventListener("click", () => showScreen("start"));
+elements.closeStatsButton.addEventListener("click", () => showScreen(state.statsReturnScreen));
 elements.resetStatsButton.addEventListener("click", resetStats);
 
 renderChoices();

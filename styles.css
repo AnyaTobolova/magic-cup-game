@@ -616,8 +616,12 @@ h2 {
   align-items: center;
 }
 
-.game-header .text-button:last-child {
+.game-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-self: end;
+  justify-content: flex-end;
 }
 
 .day-house {
